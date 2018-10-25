@@ -41,27 +41,7 @@ describe("Creer compte", () => {
         await page.click('form[action="/signup"] input[type="submit"]');
     }, timeout)
 
-    test('delete user', async () => {
-        // charger la page d'accueil
-        await page.goto('http://polr.campus-grenoble.fr/login')
-        // attendre que l'élément <body> soit chargé
-        await page.waitForSelector('body')
-        // récupérer le contenu de l'élément <body>
-        const html = await page.$eval('body', e => e.innerHTML)
-        // vérifier que dans cet élément Body on trouve "Polr du campus"
-        expect(html).toContain("Login")
-        // renseigner les champs
-        await page.type('form[action="login"] input[name="username"]', 'admin');
-        await page.type('form[action="login"] input[name="password"]', 'campus');
-        await page.screenshot({path:'./tests/img/login-admin.png' })
-        //await page.click('form[action="login"] input[type="submit"]');
-        // attendre que l'élément <body> soit chargé
-        // await page.evaluate( () => {
-        //     Array
-        //     .from( document.querySelectorAll( '#navbar li a' ) )
-        //     .filter( el => el.textContent === 'admin' )[0].click();
-        // });
-    }, timeout)
+
 
 
     // cette fonction est lancée avant chaque test de cette
