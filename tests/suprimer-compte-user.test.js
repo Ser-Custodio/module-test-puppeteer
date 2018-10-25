@@ -64,6 +64,7 @@ describe("Delete Account", () => {
         // ouvrir un onglet dans le navigateur
         page = await global.__BROWSER__.newPage();
 
+        // Define all dialog boxes to click accept
         page.on('dialog', async dialog =>{
             await dialog.accept();
 })

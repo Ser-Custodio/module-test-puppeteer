@@ -24,7 +24,7 @@ describe("Creer compte", () => {
         // click sur le lien "Sign Up" de la navigation
         await page.evaluate( () => {
             Array
-                .from( document.querySelectorAll( '#navbar li a' ) )
+                .from( document.querySelectorAll('#navbar li a'))
                 .filter(el => el.textContent === 'Sign Up' )[0].click()
         });
         // on attent que l'élément ".title" soit chargé
