@@ -1,25 +1,25 @@
 const timeout = 15000
 
 // série de tests sur la page d'accueil
-describe("Check User Stats", () => {
+describe("Connect as user", () => {
     let page
 
-    test('create user', async()=>{
+    test('create user account', async()=>{
         await page.goto('http://polr.campus-grenoble.fr');
         await page.waitForSelector('nav[role="navigation');
         // click sur le lien "Sign Up" de la navigation
-        await page.screenshot({path: './tests/img/check_stats/sign_up.png'});
+        await page.screenshot({path: './tests/img/connect_user/sign_up.png'});
         await page.evaluate( () => {
             Array
             .from( document.querySelectorAll('#navbar li a'))
             .filter(el => el.textContent === 'Sign Up' )[0].click()
         });
         // on attent que l'élément ".title" soit chargé
-        await page.waitForSelector('.title')
+        await page.waitForSelector('.title');
         // on récupère le code HTML
         const html = await page.$eval('.title', e => e.innerHTML)
         // on vérifie qu'il contient la bonne chaîne de caractères
-        expect(html).toContain("Register")
+        expect(html).toContain("Register");
         await page.waitForSelector('form[action="/signup"]');
         // renseigner les champs
         await page.type('form[action="/signup"] input[name="username"]', 'tati');
@@ -28,7 +28,7 @@ describe("Check User Stats", () => {
         await page.click('form[action="/signup"] input[type="submit"]');
     }, timeout);
 
-    test('user stats', async () => {
+    test('connect user', async () => {
         // charger la page d'accueil
         await page.goto('http://polr.campus-grenoble.fr');
         // attendre que l'élément <body> soit chargé
@@ -42,35 +42,10 @@ describe("Check User Stats", () => {
         await page.type('input[name="username"]', 'tati');
         await page.type('input[name="password"]', 'azerty');
         await page.click('input[name="login"]');
-
-        // verifier que on est bien connecte
+        // verifier que on est bien connecte en tant qu'admin
         await page.waitForSelector('.login-name');
         const html = await page.$eval('.login-name', e => e.innerHTML);
         expect(html).toContain('tati');
-
-        // entrer dans le dashboard
-        await page.click('.login-name');
-        await page.waitForSelector('.dropdown-menu');
-        await page.evaluate( () => {
-            Array
-            .from( document.querySelectorAll('.dropdown-menu li a'))
-            .filter( el => el.textContent === 'Dashboard')[0].click();
-        });
-        await page.waitForSelector('h2');
-        const htmlDash = await page.$eval('h2', e => e.innerHTML);
-        expect(htmlDash).toContain("Welcome to your Polr du campus dashboard!");
-
-        await page.waitForSelector('.nav-pills');
-        await page.evaluate( () => {
-            Array
-            .from( document.querySelectorAll('.admin-nav-item a'))
-            .filter( el => el.textContent === 'Links')[0].click();
-        });
-
-        await page.waitForSelector('.sorting_1');
-        const tdCounts = await page.$$eval('#user_links_table_wrapper tbody td', tds => tds.length);
-        expect(tdCounts).toBeGreaterThanOrEqual(2);
-        await page.screenshot({path: './tests/img/check_stats/user_stats.png'});
     }, timeout);
 
     test('logout', async() => {
@@ -87,10 +62,12 @@ describe("Check User Stats", () => {
             .from( document.querySelectorAll('.dropdown-menu li a'))
             .filter( el => el.textContent === 'Logout')[0].click();
         });
-        await page.waitForSelector('#navbar li a');
-        await page.screenshot({path: './tests/img/check_stats/logout.png'});
+        await page.waitForSelector('nav[role="navigation');
+        await page.screenshot({path: './tests/img/connect_user/logout.png'});
+
         const htmlNavBar = await page.$eval('.dropdown-toggle', e => e.innerHTML);
         expect(htmlNavBar).toContain('Sign In');
+        await page.screenshot({path: './tests/img/connect_user/logout2.png'});
     }, timeout);
 
     test('delete user', async () => {
@@ -133,14 +110,14 @@ describe("Check User Stats", () => {
         const htmlDelete = await page.$eval('#admin_users_table tr td .btn-danger', e => e.innerHTML);
         expect(htmlDelete).toContain("Delete");
         await page.click('#admin_users_table tr td .btn-danger');
-        await page.screenshot({path: './tests/img/check_stats/delete.png'});
+        await page.screenshot({path: './tests/img/connect_user/delete.png'});
     }, timeout);
 
     //Se déconnecter du compte admin
     test('se deconnecter du compte admin', async () => {
         await page.click('.login-name', {delay : 500});
         await page.waitForSelector('.dropdown-menu');
-        await page.screenshot({path: './tests/img/check_stats/avant_logout_admin.png'});
+        await page.screenshot({path: './tests/img/connect_user/avant_logout_admin.png'});
         await page.evaluate( () => {
             Array
             .from( document.querySelectorAll('.dropdown-menu li a'))
@@ -152,19 +129,18 @@ describe("Check User Stats", () => {
         const htmlLogout = await page.$eval('.dropdown-toggle', e => e.innerHTML);
         expect(htmlLogout).toContain('Sign In');
         //Screenshot déconnexion
-        await page.screenshot({path: './tests/img/check_stats/logout_admin.png'});
+        await page.screenshot({path: './tests/img/connect_user/logout_admin.png'});
 
     }, timeout)
-        // cette fonction est lancée avant chaque test de cette
-        // série de tests
-        beforeAll(async () => {
-            // ouvrir un onglet dans le navigateur
-            page = await global.__BROWSER__.newPage();
+    // cette fonction est lancée avant chaque test de cette
+    // série de tests
+    beforeAll(async () => {
+        // ouvrir un onglet dans le navigateur
+        page = await global.__BROWSER__.newPage();
 
-            // Define all dialog boxes to click accept
-            page.on('dialog', async dialog =>{
-                await dialog.accept();
-            })
-        }, timeout)
-
+        // Define all dialog boxes to click accept
+        page.on('dialog', async dialog =>{
+            await dialog.accept();
+        });
+    }, timeout)
 })

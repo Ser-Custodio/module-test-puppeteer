@@ -1,14 +1,14 @@
 const timeout = 15000
 
 // série de tests sur la page d'accueil
-describe("Check User Stats", () => {
+describe("Shorten connected", () => {
     let page
 
-    test('create user', async()=>{
+    test('create account', async()=>{
         await page.goto('http://polr.campus-grenoble.fr');
         await page.waitForSelector('nav[role="navigation');
         // click sur le lien "Sign Up" de la navigation
-        await page.screenshot({path: './tests/img/check_stats/sign_up.png'});
+        await page.screenshot({path: './tests/img/shorten_user/sign_up.png'});
         await page.evaluate( () => {
             Array
             .from( document.querySelectorAll('#navbar li a'))
@@ -28,11 +28,8 @@ describe("Check User Stats", () => {
         await page.click('form[action="/signup"] input[type="submit"]');
     }, timeout);
 
-    test('user stats', async () => {
-        // charger la page d'accueil
+    test('connect', async() =>{
         await page.goto('http://polr.campus-grenoble.fr');
-        // attendre que l'élément <body> soit chargé
-        await page.waitForSelector('body');
         // récupérer le contenu de l'élément <body>
         await page.waitForSelector('nav[role="navigation');
         await page.click('.dropdown-toggle');
@@ -45,32 +42,19 @@ describe("Check User Stats", () => {
 
         // verifier que on est bien connecte
         await page.waitForSelector('.login-name');
-        const html = await page.$eval('.login-name', e => e.innerHTML);
-        expect(html).toContain('tati');
+        const htmlConnect = await page.$eval('.login-name', e => e.innerHTML);
+        expect(htmlConnect).toContain('tati');
+        await page.screenshot({path: './tests/img/shorten_user/connect-user.png'});
 
-        // entrer dans le dashboard
-        await page.click('.login-name');
-        await page.waitForSelector('.dropdown-menu');
-        await page.evaluate( () => {
-            Array
-            .from( document.querySelectorAll('.dropdown-menu li a'))
-            .filter( el => el.textContent === 'Dashboard')[0].click();
-        });
-        await page.waitForSelector('h2');
-        const htmlDash = await page.$eval('h2', e => e.innerHTML);
-        expect(htmlDash).toContain("Welcome to your Polr du campus dashboard!");
-
-        await page.waitForSelector('.nav-pills');
-        await page.evaluate( () => {
-            Array
-            .from( document.querySelectorAll('.admin-nav-item a'))
-            .filter( el => el.textContent === 'Links')[0].click();
-        });
-
-        await page.waitForSelector('.sorting_1');
-        const tdCounts = await page.$$eval('#user_links_table_wrapper tbody td', tds => tds.length);
-        expect(tdCounts).toBeGreaterThanOrEqual(2);
-        await page.screenshot({path: './tests/img/check_stats/user_stats.png'});
+        await page.waitForSelector('.long-link-input');
+        await page.type('.long-link-input', 'https://www.google.com/search?source=hp&ei=QQbPW52GC9CRlwSHw46oAg&q=puppeteer+jest&oq=puppeteer+jest&gs_l=psy-ab.3...2441.6095.0.6926.0.0.0.0.0.0.0.0..0.0....0...1c.1.64.psy-ab..0.0.0....0.qKd5wLlrTYk');
+        //await page.screenshot({path: './tests/img/shorten1.png'});
+        await page.waitForSelector('#shorten');
+        await page.$eval( '#shorten', el => el.click());
+        await page.waitForSelector('#short_url');
+        const val = await page.$eval('#short_url', el => el.value);
+        expect(val).toMatch(/^http:\/\/polr\.campus\-grenoble\.fr\/[0-9]+/);
+        //await page.screenshot({path: './tests/img/shorten2.png'});
     }, timeout);
 
     test('logout', async() => {
@@ -87,11 +71,13 @@ describe("Check User Stats", () => {
             .from( document.querySelectorAll('.dropdown-menu li a'))
             .filter( el => el.textContent === 'Logout')[0].click();
         });
-        await page.waitForSelector('#navbar li a');
-        await page.screenshot({path: './tests/img/check_stats/logout.png'});
+        await page.waitForSelector('nav[role="navigation');
+        await page.screenshot({path: './tests/img/shorten_user/logout.png'});
         const htmlNavBar = await page.$eval('.dropdown-toggle', e => e.innerHTML);
+
         expect(htmlNavBar).toContain('Sign In');
-    }, timeout);
+        await page.screenshot({path: './tests/img/shorten_user/logout2.png'});
+    }, timeout)
 
     test('delete user', async () => {
         // charger la page d'accueil
@@ -102,14 +88,17 @@ describe("Check User Stats", () => {
         await page.waitForSelector('nav[role="navigation');
         await page.click('.dropdown-toggle');
         await page.waitForSelector('.login-dropdown-menu');
+
         // renseigner les champs
         await page.type('input[name="username"]', 'admin');
         await page.type('input[name="password"]', 'campus');
         await page.click('input[name="login"]');
+
         // verifier que on est bien connecte en tant qu'admin
         await page.waitForSelector('.login-name');
         const html = await page.$eval('.login-name', e => e.innerHTML);
         expect(html).toContain('admin');
+
         // entrer dans le dashboard
         await page.click('.login-name');
         await page.waitForSelector('.dropdown-menu');
@@ -121,6 +110,7 @@ describe("Check User Stats", () => {
         await page.waitForSelector('h2');
         const htmlDash = await page.$eval('h2', e => e.innerHTML);
         expect(htmlDash).toContain("Welcome to your Polr du campus dashboard!");
+
         await page.waitForSelector('.nav-pills');
         await page.evaluate( () => {
             Array
@@ -133,14 +123,14 @@ describe("Check User Stats", () => {
         const htmlDelete = await page.$eval('#admin_users_table tr td .btn-danger', e => e.innerHTML);
         expect(htmlDelete).toContain("Delete");
         await page.click('#admin_users_table tr td .btn-danger');
-        await page.screenshot({path: './tests/img/check_stats/delete.png'});
+        await page.screenshot({path: './tests/img/shorten_user/delete.png'});
     }, timeout);
 
     //Se déconnecter du compte admin
     test('se deconnecter du compte admin', async () => {
         await page.click('.login-name', {delay : 500});
         await page.waitForSelector('.dropdown-menu');
-        await page.screenshot({path: './tests/img/check_stats/avant_logout_admin.png'});
+        await page.screenshot({path: './tests/img/shorten_user/avant_logout_admin.png'});
         await page.evaluate( () => {
             Array
             .from( document.querySelectorAll('.dropdown-menu li a'))
@@ -152,19 +142,20 @@ describe("Check User Stats", () => {
         const htmlLogout = await page.$eval('.dropdown-toggle', e => e.innerHTML);
         expect(htmlLogout).toContain('Sign In');
         //Screenshot déconnexion
-        await page.screenshot({path: './tests/img/check_stats/logout_admin.png'});
+        await page.screenshot({path: './tests/img/shorten_user/logout_admin.png'});
 
     }, timeout)
-        // cette fonction est lancée avant chaque test de cette
-        // série de tests
-        beforeAll(async () => {
-            // ouvrir un onglet dans le navigateur
-            page = await global.__BROWSER__.newPage();
 
-            // Define all dialog boxes to click accept
-            page.on('dialog', async dialog =>{
-                await dialog.accept();
-            })
-        }, timeout)
+    // cette fonction est lancée avant chaque test de cette
+    // série de tests
+    beforeAll(async () => {
+        // ouvrir un onglet dans le navigateur
+        page = await global.__BROWSER__.newPage();
+
+    // Define all dialog boxes to click accept
+        page.on('dialog', async dialog =>{
+            await dialog.accept();
+        })
+    }, timeout)
 
 })
