@@ -4,6 +4,40 @@ const timeout = 15000
 describe("Creer compte", () => {
     let page
 
+    test('sign-up not accepted', async() => {
+        await page.goto('http://localhost:8000')
+        await page.waitForSelector('nav[role="navigation"]')
+        // click sur le lien "Sign Up" de la navigation
+        await page.evaluate(() => {
+            Array
+            .from(document.querySelectorAll('#navbar li a'))
+            .filter(el => el.textContent === 'Sign Up')[0].click();
+        });
+            // on attent que l'élément ".container" soit chargé
+            await page.waitForSelector('.container')
+            // on récupère le code HTML
+            const html = await page.$eval('.container', e => e.innerHTML)
+            // on vérifie qu'il contient la bonne chaîne de caractères et la balise form
+            expect(html).toContain("Register", 'form')
+            // attendre que l'élément <form> soit chargé
+            await page.waitForSelector('form')
+            // insérer du contenu dans le formulaire; on insère le nom de l'utilisateur
+            await page.type('form[action="/signup"] input[name="username"]', "leila%");
+            //le mot de passe
+            await page.type('form[action="/signup"] input[name="password"]', "testpassword");
+            //l'adresse mail
+            await page.type('form[action="/signup"] input[name="email"]', "test123@test.com");
+            //capture de l'écran pour vérifier que les données ont bie été insérées
+            await page.screenshot({path: './tests/img/badUsername.png'});
+            //cliquer sur le bouton submit pour soumettre la création utilisateur
+            await page.$eval('.btn-default', el => el.click());
+            await page.screenshot({path: './tests/img/create_user/clickRegister.png'});
+            await page.waitForSelector('.toast-message');
+            const toastMessage = await page.$eval('#toast-container div div.toast-message', e => e.innerHTML)
+            // on vérifie qu'il contient la bonne chaîne de caractères
+            expect(toastMessage).toContain("The username format is invalid")
+    }, timeout);
+
     // vérification du chargement de la page d'accueil
     test('home', async () => {
         // charger la page d'accueil
